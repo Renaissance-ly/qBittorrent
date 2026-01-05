@@ -88,7 +88,7 @@ namespace
 }
 
 // TransferListModel
-
+// !!! 【设计模式】MVC：TransferListModel 作为 Model，继承 QAbstractItemModel，提供 torrent 数据给 View（TransferListWidget）
 TransferListModel::TransferListModel(QObject *parent)
     : QAbstractListModel {parent}
     , m_statusStrings {
@@ -118,6 +118,7 @@ TransferListModel::TransferListModel(QObject *parent)
     connect(UIThemeManager::instance(), &UIThemeManager::themeChanged, this, [this]
     {
         loadUIThemeResources();
+        // !!! 【设计模式】Observer模式：Qt模型机制，数据变化时 emit dataChanged 通知 View 实时刷新
         emit dataChanged(index(0, 0), index((rowCount() - 1), (columnCount() - 1)), {Qt::DecorationRole, Qt::ForegroundRole});
     });
 
@@ -126,6 +127,7 @@ TransferListModel::TransferListModel(QObject *parent)
     addTorrents(Session::instance()->torrents());
 
     // Listen for torrent changes
+    // !!! 【设计模式】MVC：Model 添加 torrent 时更新内部数据，View 通过信号自动刷新
     connect(Session::instance(), &Session::torrentsLoaded, this, &TransferListModel::addTorrents);
     connect(Session::instance(), &Session::torrentAboutToBeRemoved, this, &TransferListModel::handleTorrentAboutToBeRemoved);
     connect(Session::instance(), &Session::torrentsUpdated, this, &TransferListModel::handleTorrentsUpdated);
@@ -148,7 +150,7 @@ int TransferListModel::columnCount(const QModelIndex &) const
 {
     return NB_COLUMNS;
 }
-
+// !!! 【设计模式】MVC：Model 的 data() 函数，根据角色返回 torrent 属性数据给 View 显示
 QVariant TransferListModel::headerData(const int section, const Qt::Orientation orientation, const int role) const
 {
     if (orientation == Qt::Horizontal)
@@ -635,7 +637,7 @@ void TransferListModel::addTorrents(const QList<BitTorrent::Torrent *> &torrents
 {
     qsizetype row = m_torrentList.size();
     const qsizetype total = row + torrents.size();
-
+    // !!! 【设计模式】Observer模式：Qt模型机制，插入行前调用 beginInsertRows 通知 View 更新布局
     beginInsertRows({}, row, total);
 
     m_torrentList.reserve(total);
