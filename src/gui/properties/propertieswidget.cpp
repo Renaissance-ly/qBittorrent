@@ -65,6 +65,7 @@
 #include "speedwidget.h"
 #include "ui_propertieswidget.h"
 
+ // !!! 【设计模式】MVC：PropertiesWidget 作为 View，显示 torrent Model 的属性数据
 PropertiesWidget::PropertiesWidget(QWidget *parent)
     : QWidget(parent)
     , m_ui {new Ui::PropertiesWidget}
