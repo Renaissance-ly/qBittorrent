@@ -126,6 +126,7 @@ TransferListWidget::TransferListWidget(IGUIApplication *app, QWidget *parent)
     setItemDelegate(new TransferListDelegate(this));
 
     m_sortFilterModel->setDynamicSortFilter(true);
+    // !!! 【设计模式】MVC：SortFilterModel 作为代理 Model，与 View 分离数据过滤和排序
     m_sortFilterModel->setSourceModel(m_listModel);
     m_sortFilterModel->setFilterKeyColumn(TransferListModel::TR_NAME);
     m_sortFilterModel->setFilterRole(Qt::DisplayRole);
@@ -205,6 +206,7 @@ TransferListWidget::TransferListWidget(IGUIApplication *app, QWidget *parent)
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Listen for list events
+    // !!! 【设计模式】Observer模式：Qt信号槽机制，双击时通知处理 torrent
     connect(this, &QAbstractItemView::doubleClicked, this, &TransferListWidget::torrentDoubleClicked);
     connect(this, &QWidget::customContextMenuRequested, this, &TransferListWidget::displayListMenu);
     header()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -235,6 +237,7 @@ TransferListWidget::~TransferListWidget()
     saveSettings();
 }
 
+// !!! 【设计模式】MVC：返回源 Model，实现 View 与数据分离
 TransferListModel *TransferListWidget::getSourceModel() const
 {
     return m_listModel;
@@ -1306,6 +1309,7 @@ void TransferListWidget::displayListMenu()
     listMenu->popup(QCursor::pos());
 }
 
+// !!! 【设计模式】Observer模式：当前 torrent 变化时发出信号，通知属性窗口更新
 void TransferListWidget::currentChanged(const QModelIndex &current, const QModelIndex &previous)
 {
     qDebug("CURRENT CHANGED");

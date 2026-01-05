@@ -187,6 +187,7 @@ MainWindow::MainWindow(IGUIApplication *app, const WindowState initialState, con
 
     m_ui->actionPauseSession->setVisible(!BitTorrent::Session::instance()->isPaused());
     m_ui->actionResumeSession->setVisible(BitTorrent::Session::instance()->isPaused());
+    // !!! 【设计模式】Observer模式：Qt信号槽机制，实现会话暂停时实时更新UI和标题
     connect(BitTorrent::Session::instance(), &BitTorrent::Session::paused, this, [this]
     {
         m_ui->actionPauseSession->setVisible(false);
@@ -194,6 +195,7 @@ MainWindow::MainWindow(IGUIApplication *app, const WindowState initialState, con
         refreshWindowTitle();
         refreshTrayIconTooltip();
     });
+    // !!! 【设计模式】Observer模式：Qt信号槽机制，实现会话恢复时实时更新UI和标题
     connect(BitTorrent::Session::instance(), &BitTorrent::Session::resumed, this, [this]
     {
         m_ui->actionPauseSession->setVisible(true);
@@ -248,7 +250,9 @@ MainWindow::MainWindow(IGUIApplication *app, const WindowState initialState, con
     m_ui->toolBar->insertWidget(m_columnFilterAction, spacer);
 
     // Transfer List tab
+    // !!! 【设计模式】MVC：View（TransferListWidget）使用 Model（TransferListModel）分离数据和显示
     m_transferListWidget = new TransferListWidget(app, this);
+    // !!! 【设计模式】MVC：PropertiesWidget 作为 View，加载 Model 数据（TorrentInfos）
     m_propertiesWidget = new PropertiesWidget(hSplitter);
     connect(m_transferListWidget, &TransferListWidget::currentTorrentChanged, m_propertiesWidget, &PropertiesWidget::loadTorrentInfos);
     hSplitter->addWidget(m_transferListWidget);
@@ -341,6 +345,7 @@ MainWindow::MainWindow(IGUIApplication *app, const WindowState initialState, con
     connect(m_ui->actionManageCookies, &QAction::triggered, this, &MainWindow::manageCookies);
 
     // Initialise system sleep inhibition timer
+    // *** 【代码规范】QTimer 用于定时防止系统休眠，确保多线程/异步操作安全
     m_preventTimer->setSingleShot(true);
     connect(m_preventTimer, &QTimer::timeout, this, &MainWindow::updatePowerManagementState);
     connect(pref, &Preferences::changed, this, &MainWindow::updatePowerManagementState);
