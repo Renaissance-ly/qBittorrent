@@ -36,12 +36,14 @@ TorrentContentFilterModel::TorrentContentFilterModel(QObject *parent)
 {
     // Filter settings
     setFilterKeyColumn(TorrentContentModelItem::COL_NAME);
+    // *** 【代码规范】设置过滤和排序角色，确保使用底层数据而非显示数据
     setFilterRole(TorrentContentModel::UnderlyingDataRole);
     setDynamicSortFilter(true);
     setSortCaseSensitivity(Qt::CaseInsensitive);
     setSortRole(TorrentContentModel::UnderlyingDataRole);
 }
 
+// !!! 【设计模式】MVC：SortFilterProxyModel 作为代理 View Model，过滤和排序 TorrentContentModel（源 Model）
 void TorrentContentFilterModel::setSourceModel(TorrentContentModel *model)
 {
     m_model = model;
@@ -81,6 +83,8 @@ bool TorrentContentFilterModel::filterAcceptsRow(int sourceRow, const QModelInde
     return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }
 
+
+// ??? 【算法实现】自定义排序算法，按类型和名称自然排序文件夹优先
 bool TorrentContentFilterModel::lessThan(const QModelIndex &left, const QModelIndex &right) const
 {
     switch (sortColumn())

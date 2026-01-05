@@ -122,6 +122,7 @@ namespace
         }
     };
 
+    // 【算法实现】简单长度验证算法，确保用户名至少3字符
     bool isValidWebUIUsername(const QString &username)
     {
         return (username.length() >= WEBUI_MIN_USERNAME_LENGTH);
@@ -1993,6 +1994,7 @@ void OptionsDialog::on_addWatchedFolderButton_clicked()
 
     auto *dialog = new WatchedFolderOptionsDialog({}, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
+    // !!! 【设计模式】Observer模式：对话框接受时信号通知更新 Model 和应用按钮
     connect(dialog, &QDialog::accepted, this, [this, dialog, dir, pref]()
     {
         try
