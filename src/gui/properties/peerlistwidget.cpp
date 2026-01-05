@@ -92,6 +92,7 @@ namespace
     }
 }
 
+// !!! 【设计模式】MVC：PeerListWidget 作为 View，使用 PeerListSortModel 代理显示 peers Model 数据
 PeerListWidget::PeerListWidget(PropertiesWidget *parent)
     : QTreeView(parent)
     , m_properties(parent)
@@ -134,6 +135,7 @@ PeerListWidget::PeerListWidget(PropertiesWidget *parent)
     m_listModel->setHeaderData(PeerListColumns::TOT_UP, Qt::Horizontal, QVariant(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     m_listModel->setHeaderData(PeerListColumns::RELEVANCE, Qt::Horizontal, QVariant(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
     // Proxy model to support sorting without actually altering the underlying model
+    // !!! 【设计模式】MVC：SortFilterProxyModel 作为代理，过滤和排序 peers Model
     m_proxyModel = new PeerListSortModel(this);
     m_proxyModel->setDynamicSortFilter(true);
     m_proxyModel->setSourceModel(m_listModel);
@@ -183,6 +185,7 @@ PeerListWidget::PeerListWidget(PropertiesWidget *parent)
     header()->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(header(), &QWidget::customContextMenuRequested, this, &PeerListWidget::displayColumnHeaderMenu);
     connect(header(), &QHeaderView::sectionClicked, this, &PeerListWidget::handleSortColumnChanged);
+    // !!! 【设计模式】Observer模式：表头变化信号保存设置，确保用户偏好持久
     connect(header(), &QHeaderView::sectionMoved, this, &PeerListWidget::saveSettings);
     connect(header(), &QHeaderView::sectionResized, this, &PeerListWidget::saveSettings);
     connect(header(), &QHeaderView::sortIndicatorChanged, this, &PeerListWidget::saveSettings);
@@ -249,6 +252,7 @@ void PeerListWidget::updatePeerHostNameResolutionState()
         if (!m_resolver)
         {
             m_resolver = new Net::ReverseResolution(this);
+            // !!! 【设计模式】Observer模式：主机名解析完成信号通知 View 更新 IP 显示
             connect(m_resolver, &Net::ReverseResolution::ipResolved, this, &PeerListWidget::handleResolved);
             loadPeers(m_properties->getCurrentTorrent());
         }
@@ -526,6 +530,7 @@ void PeerListWidget::updatePeer(const int row, const BitTorrent::Torrent *torren
         downloadingFiles.append(filePath.toString());
 
     const QString downloadingFilesDisplayValue = downloadingFiles.join(u';');
+    // !!! 【设计模式】MVC：Model 设置 peers 数据，View 通过代理显示
     setModelData(m_listModel, row, PeerListColumns::DOWNLOADING_PIECE, downloadingFilesDisplayValue
             , downloadingFilesDisplayValue, {}, downloadingFiles.join(u'\n'));
 
@@ -573,7 +578,7 @@ void PeerListWidget::handleSortColumnChanged(const int col)
     else
         m_proxyModel->setSortRole(PeerListSortModel::UnderlyingDataRole);
 }
-
+// *** 【代码规范】事件处理确保水平滚动安全，支持 Shift + wheel
 void PeerListWidget::wheelEvent(QWheelEvent *event)
 {
     if (event->modifiers() & Qt::ShiftModifier)
