@@ -2661,7 +2661,7 @@ window.qBittorrent.DynamicTable ??= (() => {
                 };
             }
         }
-
+/*
         #sortNodesByColumn(root, column) {
             const isColumnName = (column.name === this.fileNameColumn);
             const isReverseSort = (this.reverseSort === "0");
@@ -2686,7 +2686,38 @@ window.qBittorrent.DynamicTable ??= (() => {
                 stack.push(...node.children);
             }
         }
-
+        */
+       /*
+        _sortNodesByColumn(root, column) {
+            // !!! 【修复尝试】添加 this 检查和错误处理，避免 "is not a function" 崩溃
+            if (typeof this._sortNodesByColumn !== 'function') {
+                console.warn('[_sortNodesByColumn] Function not ready, skipping sort to prevent Content tab empty');
+                return;  // 跳过排序，防止无限错误循环
+            }
+*/
+        if(this._sortNodesByColumn) {
+            this._sortNodesByColumn(root, column);
+        }
+            const isColumnName = (column.name === this.fileNameColumn);
+            const isReverseSort = (this.reverseSort === "0");
+            const stack = [root];
+            while (stack.length > 0) {
+                const node = stack.pop();
+                node.children.sort((node1, node2) => {
+                    // list folders before files when sorting by name
+                    if (isColumnName) {
+                        if (node1.isFolder && !node2.isFolder)
+                            return -1;
+                        if (!node1.isFolder && node2.isFolder)
+                            return 1;
+                    }
+                    // ??? 【安全调用】使用 call 确保 this 正确
+                    const result = column.compareRows.call(this, node1, node2);
+                    return isReverseSort ? result : -result;
+                });
+                stack.push(...node.children);
+            }
+        }
         #filterNodes(root, filterTerms) {
             const ret = [];
             const stack = [root];
